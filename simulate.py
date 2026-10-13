@@ -15,12 +15,41 @@ from agents.belief_search import (
     InfluenceCoinEvaluation,
     SearchConfig
 )
+from agents.neural_selfplay import (
+    NeuralSelfPlayAgent,
+    SharedPolicy
+)
 from agents.fast_coup_search import FastSearchConfig
 from agents.fast_belief_search import FastBeliefSearchAgent
 from agents.search_evaluations import FastInfluenceCoinEvaluation
 from src.game import Game
 
 import random
+import torch
+
+def make_neural_agent(
+    player_id,
+    checkpoint_path="checkpoints/coup_policy.pt",
+):
+    policy = SharedPolicy(hidden_size=128)
+
+    policy.load_state_dict(
+        torch.load(
+            checkpoint_path,
+            map_location="cpu",
+            weights_only=True,
+        )
+    )
+
+    policy.eval()
+
+    return NeuralSelfPlayAgent(
+        player_id=player_id,
+        name=f"Neural-{player_id}",
+        policy=policy,
+        training=False,
+        print_turns=False,
+    )
 
 def main():
     # players = [
@@ -95,45 +124,49 @@ def main():
     #     target_weights={'bias': 0.5389083174110788, 'opponent_coins': 0.025404645360040945, 'opponent_influence': -0.2521346356941326, 'coin_advantage': -1.4527881130085707, 'influence_advantage': -0.105753482334861, 'one_influence': -0.33857228371971726},
     # )
 
-    config = FastSearchConfig(
-        time_limit=0.075,
-        max_depth=10,
-        top_completions=8,
-        sampled_completions=24,
-        minimum_action_believability=0.20,
-        challenge_threshold=0.55,
-        use_pvs=True,
-        use_aspiration=True,
-        transposition_size=250000,
-        use_killer_moves=True,
-        use_history_heuristic=True,
-    )
+    # config = FastSearchConfig(
+    #     time_limit=0.075,
+    #     max_depth=10,
+    #     top_completions=8,
+    #     sampled_completions=24,
+    #     minimum_action_believability=0.20,
+    #     challenge_threshold=0.55,
+    #     use_pvs=True,
+    #     use_aspiration=True,
+    #     transposition_size=250000,
+    #     use_killer_moves=True,
+    #     use_history_heuristic=True,
+    # )
 
-    search_agent = FastBeliefSearchAgent(
-        player_id="search",
-        name="Fast Belief Search",
-        evaluation=FastInfluenceCoinEvaluation(),
-        search_config=config,
-        seed=13,
-        print_turns=False,
-    )
+    # search_agent = FastBeliefSearchAgent(
+    #     player_id="search",
+    #     name="Fast Belief Search",
+    #     evaluation=FastInfluenceCoinEvaluation(),
+    #     search_config=config,
+    #     seed=13,
+    #     print_turns=False,
+    # )
 
     players = [
             # AdaptiveWeightedBot("1", "Anti-Agent",
             #                 genome=BEST_GENOME,
             #                 print_turns=False
             #                 ),
-            search_agent,
+            # search_agent,
+            # checkpoint_path="checkpoints/coup_policy_game_01500.pt",
+            make_neural_agent(
+                "Adam",
+            ),
             PassiveAgent("2", "Opponent 1", print_turns=False),
             PassiveAgent("3", "Opponent 2", print_turns=False),
-            PassiveAgent("4", "Opponent 3", print_turns=False),
+            # PassiveAgent("4", "Opponent 3", print_turns=False),
             # PassiveAgent("5", "Opponent 4", print_turns=False),
             # HonestRandom("6", "HonestRandom Agent 5", print_turns=False)
         ]
 
     winners = {players[i].name: 0 for i in range(len(players))}
     order = {players[i].name: [0 for i in range(len(players))] for i in range(len(players))}
-    games = 50000
+    games = 10000
     for i in range(games):
         random.shuffle(players)
         game = Game(players)
@@ -145,16 +178,16 @@ def main():
 
         winners[game.winner.name] += 1
 
-        # if (i+1)%500==0:
-        print(f"\n{i+1}/{games}")
-        print("Win percentages")
-        for k in winners:
-            print(f"{k}: {winners[k]/(i+1)}")
+        if (i+1)%500==0:
+            print(f"\n{i+1}/{games}")
+            print("Win percentages")
+            for k in winners:
+                print(f"{k}: {winners[k]/(i+1)}")
 
-    print("\nNumber of wins:", winners)
-    print("Win percentages")
-    for i in winners:
-        print(f"{i}: {winners[i][0]/winners[i][1]*100:.2f}% ({winners[i][0]}/{winners[i][1]})")
+    # print("\nNumber of wins:", winners)
+    # print("Win percentages")
+    # for i in winners:
+    #     print(f"{i}: {winners[i][0]/winners[i][1]*100:.2f}% ({winners[i][0]}/{winners[i][1]})")
 
 
 if __name__ == "__main__":
