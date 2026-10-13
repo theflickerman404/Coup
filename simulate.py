@@ -1,3 +1,4 @@
+from agents.aggressive_belief import AggressiveBelief
 from agents.always_duke import AlwaysDuke
 from agents.belief_honest_random import BeliefHonestRandom
 from agents.duke_fish import DukeFish
@@ -120,7 +121,7 @@ def main():
     print("\nNumber of wins:", winners)
     print("Win percentages")
     for i in winners:
-        print(f"{i}: {winners[i]/games}")
+        print(f"{i}: {winners[i][0]/winners[i][1]*100:.2f}% ({winners[i][0]}/{winners[i][1]})")
 
 
 if __name__ == "__main__":
