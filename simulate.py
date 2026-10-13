@@ -8,6 +8,15 @@ from agents.weighted_param_bot import WeightedParamBot
 from agents.weighted_param_bot_v2 import WeightedParamBotV2
 from agents.adaptive_weighted_bot import AdaptiveGenome, AdaptiveWeightedBot
 from agents.duke_fish import DukeFish
+from agents.belief_search import (
+    AggressiveInfluenceEvaluation,
+    BeliefSearchAgent,
+    InfluenceCoinEvaluation,
+    SearchConfig
+)
+from agents.fast_coup_search import FastSearchConfig
+from agents.fast_belief_search import FastBeliefSearchAgent
+from agents.search_evaluations import FastInfluenceCoinEvaluation
 from src.game import Game
 
 import random
@@ -77,23 +86,47 @@ def main():
     # )
 
     # Against 3 BeliefHonestRandom
-    BEST_GENOME = AdaptiveGenome(
-        action_weights={'income': {'bias': 0.2836188552122593, 'own_coins': -0.39101512679816064, 'own_coins_high': 0.09997154458136502, 'own_influence': 0.2584994366988127, 'opponent_coins': 0.15590500590689055, 'opponent_influence': -0.47540655236778007, 'coin_advantage': 0.08170939828729738, 'influence_advantage': 0.3408943684813064, 'living_opponents': -0.5099948035609069, 'opponent_one_influence': 0.22842085869382978, 'self_one_influence': 0.266243124834218, 'can_coup': -0.1197546271855578, 'can_assassinate': 0.4758447777626925, 'turn_progress': -0.7118353452082102, 'game_length': -0.21792999872400168}, 'foreign_aid': {'bias': -0.6154703723874181, 'own_coins': -0.24104746356495435, 'own_coins_high': 1.7858452527451512, 'own_influence': -0.04719820837831351, 'opponent_coins': -0.3662065656779764, 'opponent_influence': -0.3681506303856943, 'coin_advantage': -0.6628266145626752, 'influence_advantage': 1.7090952171195275, 'living_opponents': -0.48521659021902397, 'opponent_one_influence': 0.7438680193558729, 'self_one_influence': -0.8841668944291918, 'can_coup': -0.28104489719675096, 'can_assassinate': -0.454664855594723, 'turn_progress': 1.0400250690372712, 'game_length': -0.44631016411014923}, 'coup': {'bias': 0.19896116487484788, 'own_coins': -1.2055786817155054, 'own_coins_high': 1.5900532554021893, 'own_influence': 0.16709579190803497, 'opponent_coins': -0.36845117878400946, 'opponent_influence': -0.18809586112849605, 'coin_advantage': 0.12741476082864955, 'influence_advantage': -0.5935293856538717, 'living_opponents': 0.04602429484187563, 'opponent_one_influence': -0.6200589943886652, 'self_one_influence': -0.7762253412406406, 'can_coup': -0.3484451491923478, 'can_assassinate': -1.1261396929168566, 'turn_progress': 0.9076474116754613, 'game_length': 0.5684814115655054}, 'tax': {'bias': 2.517445632674812, 'own_coins': 1.682853587282375, 'own_coins_high': 0.7802849983572876, 'own_influence': -0.14693082995417167, 'opponent_coins': -0.06934772685295303, 'opponent_influence': 1.094295948963396, 'coin_advantage': 0.4824729873421946, 'influence_advantage': -0.9303719413272008, 'living_opponents': 0.04914261081600596, 'opponent_one_influence': 0.47676992642291965, 'self_one_influence': -0.1362452766279711, 'can_coup': 0.14927657202178524, 'can_assassinate': 0.41829074682660505, 'turn_progress': 1.341470729996947, 'game_length': -0.09679996977488452}, 'assassinate': {'bias': -0.024594562586477686, 'own_coins': -0.22354848523351184, 'own_coins_high': 0.43419638483790385, 'own_influence': -0.4828622421695537, 'opponent_coins': 0.20037294771394037, 'opponent_influence': 0.2075562823790767, 'coin_advantage': -0.35587498475629464, 'influence_advantage': -0.4630488075689718, 'living_opponents': 0.1300807338963227, 'opponent_one_influence': -0.33571210787977346, 'self_one_influence': -0.2615319536949776, 'can_coup': -0.7991378184493014, 'can_assassinate': -1.182323281897819, 'turn_progress': 0.4566454039463992, 'game_length': -0.17251501677084674}, 'exchange': {'bias': -0.43276168114676283, 'own_coins': 0.41752514564349874, 'own_coins_high': -0.3184568339293069, 'own_influence': 0.37014939594319307, 'opponent_coins': 1.031322382423914, 'opponent_influence': -0.14048262540840512, 'coin_advantage': 0.6359008788226048, 'influence_advantage': 0.28513796921158036, 'living_opponents': -0.668997763228897, 'opponent_one_influence': 0.2881534842297323, 'self_one_influence': -0.5529432699975776, 'can_coup': -0.8581680045435406, 'can_assassinate': -0.0474633983036489, 'turn_progress': -0.824608036119308, 'game_length': 0.04856026418787055}, 'steal': {'bias': 0.1706660418488214, 'own_coins': 0.3483998406704631, 'own_coins_high': 0.3397241383645003, 'own_influence': -1.159285018362108, 'opponent_coins': 0.08147035467454067, 'opponent_influence': 0.7003606919280896, 'coin_advantage': -0.05295394440086795, 'influence_advantage': -0.9856908648037778, 'living_opponents': -0.9673610570397299, 'opponent_one_influence': -0.08801045536414251, 'self_one_influence': -1.0010711521032416, 'can_coup': -0.9708903457468261, 'can_assassinate': 0.1726451943184741, 'turn_progress': -0.37875212158409016, 'game_length': -0.3022999750436789}},
-        bluff_weights={'bias': 0.1954958413248311, 'own_coins': -0.03780442778974891, 'own_coins_high': 1.7176158069463372, 'own_influence': 0.21765633479013072, 'opponent_coins': -0.16113945113089112, 'opponent_influence': 1.6793451216885709, 'coin_advantage': -0.13860498897778084, 'influence_advantage': -0.6709986632754, 'living_opponents': 0.14743366634927868, 'opponent_one_influence': 0.12393921880436289, 'self_one_influence': 0.545991754091004, 'can_coup': -0.4086526375636896, 'can_assassinate': 1.3196864667753638, 'turn_progress': 1.535819163421152, 'game_length': -0.3651578948094706},
-        challenge_weights={'bias': -2.1956084147030603, 'own_coins': 0.1459355035564848, 'own_coins_high': -1.0203620664936535, 'own_influence': -0.9957069694944602, 'opponent_coins': 0.2941487477000325, 'opponent_influence': 0.4027114759090364, 'coin_advantage': -0.41612156142475715, 'influence_advantage': -0.1809372548326339, 'living_opponents': 0.8537145101317939, 'opponent_one_influence': 0.10866439073608875, 'self_one_influence': 0.4202483684133178, 'can_coup': -1.4532606380109019, 'can_assassinate': -1.0996724330788827, 'turn_progress': -0.8235305146023566, 'game_length': 0.8723835293511284},
-        block_weights={'bias': -0.005272812855200537, 'own_coins': 0.5663770166365032, 'own_coins_high': 1.108046516722926, 'own_influence': 0.37371834851469365, 'opponent_coins': -1.8198270367157376, 'opponent_influence': -0.20258860391131042, 'coin_advantage': -1.0371351710981684, 'influence_advantage': -0.46431059039730105, 'living_opponents': -1.722056465987835, 'opponent_one_influence': -0.06145204534041934, 'self_one_influence': 1.579080619782057, 'can_coup': 1.119283218966778, 'can_assassinate': 0.11467377811767693, 'turn_progress': 0.4138834162283139, 'game_length': -0.043014101180622655},
-        target_weights={'bias': 0.5389083174110788, 'opponent_coins': 0.025404645360040945, 'opponent_influence': -0.2521346356941326, 'coin_advantage': -1.4527881130085707, 'influence_advantage': -0.105753482334861, 'one_influence': -0.33857228371971726},
+    # BEST_GENOME = AdaptiveGenome(
+    #     action_weights={'income': {'bias': 0.2836188552122593, 'own_coins': -0.39101512679816064, 'own_coins_high': 0.09997154458136502, 'own_influence': 0.2584994366988127, 'opponent_coins': 0.15590500590689055, 'opponent_influence': -0.47540655236778007, 'coin_advantage': 0.08170939828729738, 'influence_advantage': 0.3408943684813064, 'living_opponents': -0.5099948035609069, 'opponent_one_influence': 0.22842085869382978, 'self_one_influence': 0.266243124834218, 'can_coup': -0.1197546271855578, 'can_assassinate': 0.4758447777626925, 'turn_progress': -0.7118353452082102, 'game_length': -0.21792999872400168}, 'foreign_aid': {'bias': -0.6154703723874181, 'own_coins': -0.24104746356495435, 'own_coins_high': 1.7858452527451512, 'own_influence': -0.04719820837831351, 'opponent_coins': -0.3662065656779764, 'opponent_influence': -0.3681506303856943, 'coin_advantage': -0.6628266145626752, 'influence_advantage': 1.7090952171195275, 'living_opponents': -0.48521659021902397, 'opponent_one_influence': 0.7438680193558729, 'self_one_influence': -0.8841668944291918, 'can_coup': -0.28104489719675096, 'can_assassinate': -0.454664855594723, 'turn_progress': 1.0400250690372712, 'game_length': -0.44631016411014923}, 'coup': {'bias': 0.19896116487484788, 'own_coins': -1.2055786817155054, 'own_coins_high': 1.5900532554021893, 'own_influence': 0.16709579190803497, 'opponent_coins': -0.36845117878400946, 'opponent_influence': -0.18809586112849605, 'coin_advantage': 0.12741476082864955, 'influence_advantage': -0.5935293856538717, 'living_opponents': 0.04602429484187563, 'opponent_one_influence': -0.6200589943886652, 'self_one_influence': -0.7762253412406406, 'can_coup': -0.3484451491923478, 'can_assassinate': -1.1261396929168566, 'turn_progress': 0.9076474116754613, 'game_length': 0.5684814115655054}, 'tax': {'bias': 2.517445632674812, 'own_coins': 1.682853587282375, 'own_coins_high': 0.7802849983572876, 'own_influence': -0.14693082995417167, 'opponent_coins': -0.06934772685295303, 'opponent_influence': 1.094295948963396, 'coin_advantage': 0.4824729873421946, 'influence_advantage': -0.9303719413272008, 'living_opponents': 0.04914261081600596, 'opponent_one_influence': 0.47676992642291965, 'self_one_influence': -0.1362452766279711, 'can_coup': 0.14927657202178524, 'can_assassinate': 0.41829074682660505, 'turn_progress': 1.341470729996947, 'game_length': -0.09679996977488452}, 'assassinate': {'bias': -0.024594562586477686, 'own_coins': -0.22354848523351184, 'own_coins_high': 0.43419638483790385, 'own_influence': -0.4828622421695537, 'opponent_coins': 0.20037294771394037, 'opponent_influence': 0.2075562823790767, 'coin_advantage': -0.35587498475629464, 'influence_advantage': -0.4630488075689718, 'living_opponents': 0.1300807338963227, 'opponent_one_influence': -0.33571210787977346, 'self_one_influence': -0.2615319536949776, 'can_coup': -0.7991378184493014, 'can_assassinate': -1.182323281897819, 'turn_progress': 0.4566454039463992, 'game_length': -0.17251501677084674}, 'exchange': {'bias': -0.43276168114676283, 'own_coins': 0.41752514564349874, 'own_coins_high': -0.3184568339293069, 'own_influence': 0.37014939594319307, 'opponent_coins': 1.031322382423914, 'opponent_influence': -0.14048262540840512, 'coin_advantage': 0.6359008788226048, 'influence_advantage': 0.28513796921158036, 'living_opponents': -0.668997763228897, 'opponent_one_influence': 0.2881534842297323, 'self_one_influence': -0.5529432699975776, 'can_coup': -0.8581680045435406, 'can_assassinate': -0.0474633983036489, 'turn_progress': -0.824608036119308, 'game_length': 0.04856026418787055}, 'steal': {'bias': 0.1706660418488214, 'own_coins': 0.3483998406704631, 'own_coins_high': 0.3397241383645003, 'own_influence': -1.159285018362108, 'opponent_coins': 0.08147035467454067, 'opponent_influence': 0.7003606919280896, 'coin_advantage': -0.05295394440086795, 'influence_advantage': -0.9856908648037778, 'living_opponents': -0.9673610570397299, 'opponent_one_influence': -0.08801045536414251, 'self_one_influence': -1.0010711521032416, 'can_coup': -0.9708903457468261, 'can_assassinate': 0.1726451943184741, 'turn_progress': -0.37875212158409016, 'game_length': -0.3022999750436789}},
+    #     bluff_weights={'bias': 0.1954958413248311, 'own_coins': -0.03780442778974891, 'own_coins_high': 1.7176158069463372, 'own_influence': 0.21765633479013072, 'opponent_coins': -0.16113945113089112, 'opponent_influence': 1.6793451216885709, 'coin_advantage': -0.13860498897778084, 'influence_advantage': -0.6709986632754, 'living_opponents': 0.14743366634927868, 'opponent_one_influence': 0.12393921880436289, 'self_one_influence': 0.545991754091004, 'can_coup': -0.4086526375636896, 'can_assassinate': 1.3196864667753638, 'turn_progress': 1.535819163421152, 'game_length': -0.3651578948094706},
+    #     challenge_weights={'bias': -2.1956084147030603, 'own_coins': 0.1459355035564848, 'own_coins_high': -1.0203620664936535, 'own_influence': -0.9957069694944602, 'opponent_coins': 0.2941487477000325, 'opponent_influence': 0.4027114759090364, 'coin_advantage': -0.41612156142475715, 'influence_advantage': -0.1809372548326339, 'living_opponents': 0.8537145101317939, 'opponent_one_influence': 0.10866439073608875, 'self_one_influence': 0.4202483684133178, 'can_coup': -1.4532606380109019, 'can_assassinate': -1.0996724330788827, 'turn_progress': -0.8235305146023566, 'game_length': 0.8723835293511284},
+    #     block_weights={'bias': -0.005272812855200537, 'own_coins': 0.5663770166365032, 'own_coins_high': 1.108046516722926, 'own_influence': 0.37371834851469365, 'opponent_coins': -1.8198270367157376, 'opponent_influence': -0.20258860391131042, 'coin_advantage': -1.0371351710981684, 'influence_advantage': -0.46431059039730105, 'living_opponents': -1.722056465987835, 'opponent_one_influence': -0.06145204534041934, 'self_one_influence': 1.579080619782057, 'can_coup': 1.119283218966778, 'can_assassinate': 0.11467377811767693, 'turn_progress': 0.4138834162283139, 'game_length': -0.043014101180622655},
+    #     target_weights={'bias': 0.5389083174110788, 'opponent_coins': 0.025404645360040945, 'opponent_influence': -0.2521346356941326, 'coin_advantage': -1.4527881130085707, 'influence_advantage': -0.105753482334861, 'one_influence': -0.33857228371971726},
+    # )
+
+    config = FastSearchConfig(
+        time_limit=0.075,
+        max_depth=10,
+        top_completions=8,
+        sampled_completions=24,
+        minimum_action_believability=0.20,
+        challenge_threshold=0.55,
+        use_pvs=True,
+        use_aspiration=True,
+        transposition_size=250000,
+        use_killer_moves=True,
+        use_history_heuristic=True,
+    )
+
+    search_agent = FastBeliefSearchAgent(
+        player_id="search",
+        name="Fast Belief Search",
+        evaluation=FastInfluenceCoinEvaluation(),
+        search_config=config,
+        seed=13,
+        print_turns=False,
     )
 
     players = [
-            AdaptiveWeightedBot("1", "Anti-Agent",
-                            genome=BEST_GENOME,
-                            print_turns=False
-                            ),
-            BeliefHonestRandom("2", "Opponent 1", print_turns=False),
-            BeliefHonestRandom("3", "Opponent 2", print_turns=False),
-            # BeliefHonestRandom("4", "Opponent 3", print_turns=False),
-            # HonestRandom("5", "HonestRandom Agent 4", print_turns=False),
+            # AdaptiveWeightedBot("1", "Anti-Agent",
+            #                 genome=BEST_GENOME,
+            #                 print_turns=False
+            #                 ),
+            search_agent,
+            PassiveAgent("2", "Opponent 1", print_turns=False),
+            PassiveAgent("3", "Opponent 2", print_turns=False),
+            PassiveAgent("4", "Opponent 3", print_turns=False),
+            # PassiveAgent("5", "Opponent 4", print_turns=False),
             # HonestRandom("6", "HonestRandom Agent 5", print_turns=False)
         ]
 
@@ -111,11 +144,11 @@ def main():
 
         winners[game.winner.name] += 1
 
-        if (i+1)%500==0:
-            print(f"\n{i+1}/{games}")
-            print("Win percentages")
-            for k in winners:
-                print(f"{k}: {winners[k]/(i+1)}")
+        # if (i+1)%500==0:
+        print(f"\n{i+1}/{games}")
+        print("Win percentages")
+        for k in winners:
+            print(f"{k}: {winners[k]/(i+1)}")
 
     print("\nNumber of wins:", winners)
     print("Win percentages")

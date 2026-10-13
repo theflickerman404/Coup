@@ -288,6 +288,16 @@ class Game:
             )
             if not isinstance(should_challenge, bool):
                 raise ValueError("Challenge decisions must be booleans.")
+            self._notify_observers(
+                "challenge_decision",
+                {
+                    "challenger_id": challenger.id,
+                    "claimant_id": claimant.id,
+                    "role": role.value,
+                    "challenged": should_challenge
+                }
+            )
+
             if should_challenge:
                 self._record_event(
                     f"{challenger.name} challenges {claimant.name}'s {role.value} claim."
